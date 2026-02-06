@@ -138,6 +138,8 @@ class Trainer:
         line = f"[{ts}] {msg}"
         with open(self.log_file, "a", encoding="utf-8") as f:
             f.write(line + "\n")
+            f.flush()  # 즉시 디스크에 저장
+            os.fsync(f.fileno())  # OS 버퍼도 flush
         if also_console:
             print(line)
 
@@ -280,6 +282,8 @@ class Trainer:
         # 로그 파일 초기화
         with open(self.log_file, "w", encoding="utf-8") as f:
             f.write("")
+            f.flush()
+            os.fsync(f.fileno())
 
         # 상세 설정 정보 기록
         self.log("=" * 80, True)
