@@ -51,22 +51,35 @@ class CRDataset(Dataset):
         self.n = len(self.struct)
 
     def __len__(self):
-        return self.n
+        # augment_180이 활성화되면 데이터를 2배로 증강
+        return self.n * 2 if self.augment else self.n
 
     def __getitem__(self, idx):
         """
         Returns: (struct, spectrum)
           - struct: (1, 128, 128) float32
           - spectrum: (2, 2, out_len) float32 BGGR
+
+        augment_180이 활성화되면:
+          - idx 0~n-1: 원본
+          - idx n~2n-1: 180도 회전
         """
+        # 실제 데이터 인덱스와 회전 여부 결정
+        if self.augment:
+            actual_idx = idx % self.n
+            apply_rotation = idx >= self.n
+        else:
+            actual_idx = idx
+            apply_rotation = False
+
         # 구조 이미지: (1, 128, 128) uint8 → float32
-        struct = self.struct[idx].astype(np.float32)  # (1, 128, 128)
+        struct = self.struct[actual_idx].astype(np.float32)  # (1, 128, 128)
 
         if self.map_to_pm1:
             struct = struct * 2.0 - 1.0  # [0,1] → [-1,1]
 
         # 스펙트럼: (3, 301) float32
-        spec = self.spectra[idx].astype(np.float32)  # (3, 301)
+        spec = self.spectra[actual_idx].astype(np.float32)  # (3, 301)
 
         # 부호 변경: 음수 데이터를 양수로 변환
         spec = -spec
@@ -90,9 +103,10 @@ class CRDataset(Dataset):
         bggr[1, 1, :] = r  # [1, 1] = R
 
         # 180도 회전 augmentation (구조 flip + B/R 교환)
-        if self.augment and np.random.rand() < 0.5:
-            struct = np.flip(struct, axis=(1, 2)).copy()  # H, W 모두 flip
-            # B/R 교환: BGGR에서 [0,0]과 [1,1] swap
+        # 대각선 대칭 구조이므로 회전 후에도 유효한 샘플
+        if apply_rotation:
+            struct = np.flip(struct, axis=(1, 2)).copy()  # H, W 모두 flip (180도 회전)
+            # B/R 교환: BGGR에서 [0,0]과 [1,1] swap (180도 회전 시 B와 R 위치 바뀜)
             bggr_aug = bggr.copy()
             bggr_aug[0, 0, :] = bggr[1, 1, :]  # B ← R
             bggr_aug[1, 1, :] = bggr[0, 0, :]  # R ← B
