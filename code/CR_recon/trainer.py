@@ -319,10 +319,12 @@ class Trainer:
         self.log("=" * 80, True)
         self.log("", True)
 
-        # Dashboard 서버 시작
+        # Dashboard 서버 시작 및 상태 초기화
         if self.dashboard_server:
             try:
                 self.dashboard_server.start()
+                # 새 훈련 시작 시 이전 상태 초기화
+                self.dashboard_server.reset_state()
                 self.log("Dashboard server started", True)
             except Exception as e:
                 self.log(f"[WARNING] Failed to start dashboard server: {e}", also_console=True)

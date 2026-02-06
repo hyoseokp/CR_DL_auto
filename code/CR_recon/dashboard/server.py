@@ -249,3 +249,26 @@ class DashboardServer:
     def is_running(self) -> bool:
         """서버 실행 상태."""
         return self.running and self.server_thread is not None and self.server_thread.is_alive()
+
+    def reset_state(self):
+        """상태 초기화 (새 훈련 시작 시 호출)."""
+        self.state = {
+            "epoch": 0,
+            "total_epochs": 0,
+            "lr": 0.0,
+            "train_loss": 0.0,
+            "val_loss": 0.0,
+            "best_val": float("inf"),
+            "train_losses": [],
+            "val_losses": [],
+            "sample": None,
+            "progress": {
+                "stage": "",
+                "epoch": 0,
+                "total_epochs": 0,
+                "batch": 0,
+                "total_batches": 0,
+                "current_loss": 0.0,
+                "lr": 0.0
+            }
+        }
