@@ -4,14 +4,10 @@ config의 loss.name으로 loss를 교체 가능
 """
 from .mse_pearson import get_mse_pearson_loss
 from .weighted_smooth import get_weighted_smooth_loss
-from .huber_pearson import get_huber_pearson_loss
-from .smoothness_mse import get_smoothness_mse_loss
 
 _LOSSES = {
     "mse_pearson": get_mse_pearson_loss,
     "weighted_smooth": get_weighted_smooth_loss,
-    "huber_pearson": get_huber_pearson_loss,
-    "smoothness_mse": get_smoothness_mse_loss,
 }
 
 
